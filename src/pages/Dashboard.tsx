@@ -27,7 +27,8 @@ export default function Dashboard() {
   const [recentClockIns, setRecentClockIns] = useState<RecordData[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/v1/admin/attendance')
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    fetch(`${apiUrl}/api/v1/admin/attendance`)
       .then(r => r.json())
       .then(json => {
         if (json.success) setRecentClockIns(json.data.slice(0, 5));

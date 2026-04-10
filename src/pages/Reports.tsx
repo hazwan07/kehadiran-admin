@@ -16,6 +16,46 @@ const topAnomalies = [
 ];
 
 export default function Reports() {
+
+  const handleExportCSV = async () => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const r = await fetch(`${apiUrl}/api/v1/admin/attendance`);
+      const json = await r.json();
+      
+      if (!json.success || !json.data.length) {
+        alert('Tiada data kehadiran untuk dieksport.');
+        return;
+      }
+
+      const rows = json.data;
+      const headers = ['ID', 'Masa', 'Nama', 'Tapak', 'Radius Geofence (m)', 'Accuracy GPS (m)', 'Anomali Score', 'Status'];
+      
+      const csvContent = rows.map((r: any) => {
+        const masa = new Date(r.time).toLocaleString('ms-MY').replace(/,/g, '');
+        return `${r.id},${masa},"${r.name}","${r.site}",${r.distance || 0},${r.accuracy || 0},${r.score},${r.status}`;
+      });
+
+      const csv = [headers.join(','), ...csvContent].join('\n');
+      
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `payroll_export_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (e) {
+      alert('Gagal mengeksport fail CSV.');
+    }
+  };
+
+  const handleExportPDF = () => {
+    window.print();
+  };
+
   return (
     <div>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -24,8 +64,8 @@ export default function Reports() {
           <p>Ringkasan kehadiran bulanan dan analisis anomali</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-primary" onClick={() => alert('Fungsi Export Payroll akan ditambah pada fasa seterusnya.')}>📥 Export Payroll (CSV)</button>
-          <button className="btn btn-outline" onClick={() => alert('Fungsi Export PDF akan ditambah pada fasa seterusnya.')}>📄 Export PDF</button>
+          <button className="btn btn-primary" onClick={handleExportCSV}>📥 Export Payroll (CSV)</button>
+          <button className="btn btn-outline" onClick={handleExportPDF}>📄 Export PDF</button>
         </div>
       </div>
 
@@ -145,7 +185,7 @@ export default function Reports() {
             <option>Tapak Beta</option>
             <option>Tapak Gamma</option>
           </select>
-          <button className="btn btn-primary" onClick={() => alert('Fungsi Muat Turun CSV akan ditambah pada fasa seterusnya.')}>📥 Muat Turun CSV</button>
+          <button className="btn btn-primary" onClick={handleExportCSV}>📥 Muat Turun CSV</button>
         </div>
       </div>
     </div>

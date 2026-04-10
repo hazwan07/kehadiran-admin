@@ -1,23 +1,98 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const EMPLOYEES = [
-  { id: 'E001', name: 'Ahmad bin Ali', ic: 'XXXXXX-XX-1234', dept: 'Pembinaan', status: 'ACTIVE', devices: 1 },
-  { id: 'E002', name: 'Siti Aminah', ic: 'XXXXXX-XX-5678', dept: 'Pembinaan', status: 'ACTIVE', devices: 1 },
-  { id: 'E003', name: 'Razak bin Ismail', ic: 'XXXXXX-XX-9012', dept: 'Elektrik', status: 'ACTIVE', devices: 2 },
-  { id: 'E004', name: 'Fatimah binti Hassan', ic: 'XXXXXX-XX-3456', dept: 'Pembinaan', status: 'ACTIVE', devices: 1 },
-  { id: 'E005', name: 'Kumar a/l Raju', ic: 'XXXXXX-XX-7890', dept: 'Mekanikal', status: 'INACTIVE', devices: 0 },
-  { id: 'E006', name: 'Lim Wei Ming', ic: 'XXXXXX-XX-2345', dept: 'Pembinaan', status: 'ACTIVE', devices: 1 },
-  { id: 'E007', name: 'Muthu a/l Samy', ic: 'XXXXXX-XX-6789', dept: 'Am', status: 'ACTIVE', devices: 1 },
-  { id: 'E008', name: 'Norhayati binti Osman', ic: 'XXXXXX-XX-0123', dept: 'Elektrik', status: 'ACTIVE', devices: 1 },
-];
+type Employee = {
+  employeeId: string;
+  name: string;
+  icNumber: string;
+  department: string;
+  status: string;
+  devices: number;
+};
 
 export default function Employees() {
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [search, setSearch] = useState('');
   const [deptFilter, setDeptFilter] = useState('ALL');
+  
+  const [showModal, setShowModal] = useState(false);
+  const [modalMode, setModalMode] = useState<'ADD' | 'EDIT'>('ADD');
+  const [editingId, setEditingId] = useState('');
+  const [formData, setFormData] = useState({ name: '', icNumber: '', department: '', pin: '123456', status: 'ACTIVE' });
+  const [loading, setLoading] = useState(false);
 
-  const filtered = EMPLOYEES.filter((e) => {
-    if (deptFilter !== 'ALL' && e.dept !== deptFilter) return false;
-    if (search && !e.name.toLowerCase().includes(search.toLowerCase()) && !e.id.includes(search)) return false;
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
+  const fetchEmployees = async () => {
+    try {
+      const r = await fetch(`${apiUrl}/api/v1/admin/employees`);
+      const json = await r.json();
+      if (json.success) setEmployees(json.data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const isEdit = modalMode === 'EDIT';
+      const endpoint = isEdit ? `${apiUrl}/api/v1/admin/employees/${editingId}` : `${apiUrl}/api/v1/admin/employees`;
+      const method = isEdit ? 'PUT' : 'POST';
+
+      const res = await fetch(endpoint, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (res.ok) {
+        setShowModal(false);
+        fetchEmployees();
+      } else {
+        alert('Gagal menyimpan pekerja.');
+      }
+    } catch (err) {
+      alert('Ralat pelayan.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRevoke = async (id: string) => {
+    if (!confirm('Adakah anda pasti untuk menyekat pekerja ini dan revoke semua peranti mereka?')) return;
+    try {
+      const res = await fetch(`${apiUrl}/api/v1/admin/employees/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'INACTIVE', revokeDevices: true }),
+      });
+      if (res.ok) fetchEmployees();
+    } catch (e) {
+      alert('Gagal revoke pekerja.');
+    }
+  };
+
+  const openEdit = (emp: Employee) => {
+    setModalMode('EDIT');
+    setEditingId(emp.employeeId);
+    setFormData({ name: emp.name, icNumber: emp.icNumber, department: emp.department, pin: '', status: emp.status });
+    setShowModal(true);
+  };
+
+  const openAdd = () => {
+    setModalMode('ADD');
+    setFormData({ name: '', icNumber: '', department: 'Am', pin: '123456', status: 'ACTIVE' });
+    setShowModal(true);
+  };
+
+  const filtered = employees.filter((e) => {
+    if (deptFilter !== 'ALL' && e.department !== deptFilter) return false;
+    if (search && !e.name.toLowerCase().includes(search.toLowerCase()) && !e.employeeId.includes(search)) return false;
     return true;
   });
 
@@ -28,7 +103,7 @@ export default function Employees() {
           <h2>Pengurusan Pekerja</h2>
           <p>Senarai semua pekerja dan peranti mereka</p>
         </div>
-        <button className="btn btn-primary" onClick={() => alert('Fungsi Tambah Pekerja akan ditambah pada fasa seterusnya.')}>+ Tambah Pekerja</button>
+        <button className="btn btn-primary" onClick={openAdd}>+ Tambah Pekerja</button>
       </div>
 
       <div className="filters-bar">
@@ -62,12 +137,14 @@ export default function Employees() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((emp) => (
-              <tr key={emp.id}>
-                <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{emp.id}</td>
+            {filtered.length === 0 ? (
+              <tr><td colSpan={7} style={{ textAlign: 'center', padding: 20 }}>Tiada rekod.</td></tr>
+            ) : filtered.map((emp) => (
+              <tr key={emp.employeeId}>
+                <td style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: 11 }}>{emp.employeeId.slice(0, 8)}...</td>
                 <td style={{ fontWeight: 600 }}>{emp.name}</td>
-                <td style={{ fontFamily: 'monospace', color: '#64748b', fontSize: 12 }}>{emp.ic}</td>
-                <td>{emp.dept}</td>
+                <td style={{ fontFamily: 'monospace', color: '#64748b', fontSize: 12 }}>{emp.icNumber}</td>
+                <td>{emp.department}</td>
                 <td>
                   <span className={emp.status === 'ACTIVE' ? 'badge badge-success' : 'badge badge-danger'}>
                     {emp.status === 'ACTIVE' ? 'Aktif' : 'Tidak Aktif'}
@@ -84,8 +161,8 @@ export default function Employees() {
                 </td>
                 <td>
                   <div style={{ display: 'flex', gap: 6 }}>
-                    <button className="btn btn-outline btn-sm" onClick={() => alert('Fungsi Edit akan ditambah pada fasa seterusnya.')}>Edit</button>
-                    <button className="btn btn-outline btn-sm" style={{ color: '#ef4444', borderColor: '#fca5a5' }} onClick={() => alert('Fungsi Revoke akan ditambah pada fasa seterusnya.')}>
+                    <button className="btn btn-outline btn-sm" onClick={() => openEdit(emp)}>Edit</button>
+                    <button className="btn btn-outline btn-sm" style={{ color: '#ef4444', borderColor: '#fca5a5' }} onClick={() => handleRevoke(emp.employeeId)}>
                       Revoke
                     </button>
                   </div>
@@ -95,6 +172,55 @@ export default function Employees() {
           </tbody>
         </table>
       </div>
+
+      {showModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+        }}>
+          <div style={{ background: '#fff', padding: 30, borderRadius: 12, width: 400, maxWidth: '90%' }}>
+            <h3 style={{ marginBottom: 20 }}>{modalMode === 'ADD' ? 'Tambah Pekerja Baru' : 'Edit Pekerja'}</h3>
+            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Nama Penuh</label>
+                <input required className="filter-input" style={{ width: '100%' }} value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Nombor IC / Passport</label>
+                <input required className="filter-input" style={{ width: '100%' }} value={formData.icNumber} onChange={e => setFormData({ ...formData, icNumber: e.target.value })} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Jabatan</label>
+                <select className="filter-select" style={{ width: '100%' }} value={formData.department} onChange={e => setFormData({ ...formData, department: e.target.value })}>
+                  <option>Pembinaan</option>
+                  <option>Elektrik</option>
+                  <option>Mekanikal</option>
+                  <option>Am</option>
+                </select>
+              </div>
+              {modalMode === 'ADD' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 4 }}>PIN Log Masuk (6-digit)</label>
+                  <input required className="filter-input" style={{ width: '100%' }} value={formData.pin} onChange={e => setFormData({ ...formData, pin: e.target.value })} />
+                </div>
+              )}
+              {modalMode === 'EDIT' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Status</label>
+                  <select className="filter-select" style={{ width: '100%' }} value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
+                    <option value="ACTIVE">Aktif</option>
+                    <option value="INACTIVE">Tidak Aktif</option>
+                  </select>
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: 12, marginTop: 10 }}>
+                <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => setShowModal(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={loading}>{loading ? 'Menyimpan...' : 'Simpan'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

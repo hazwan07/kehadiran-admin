@@ -5,7 +5,7 @@ const NAV_ITEMS = [
   { path: '/attendance', label: 'Kehadiran', icon: '📋' },
   { path: '/flagged', label: 'Ditanda', icon: '⚠️', badge: 5 },
   { path: '/employees', label: 'Pekerja', icon: '👥' },
-  { path: '/sites', label: 'Tapak', icon: '📍' },
+  { path: '/sites', label: 'Lokasi', icon: '📍' },
   { path: '/reports', label: 'Laporan', icon: '📈' },
 ];
 
