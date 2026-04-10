@@ -24,8 +24,8 @@ export default function Reports() {
           <p>Ringkasan kehadiran bulanan dan analisis anomali</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-primary">📥 Export Payroll (CSV)</button>
-          <button className="btn btn-outline">📄 Export PDF</button>
+          <button className="btn btn-primary" onClick={() => alert('Fungsi Export Payroll akan ditambah pada fasa seterusnya.')}>📥 Export Payroll (CSV)</button>
+          <button className="btn btn-outline" onClick={() => alert('Fungsi Export PDF akan ditambah pada fasa seterusnya.')}>📄 Export PDF</button>
         </div>
       </div>
 
@@ -145,7 +145,7 @@ export default function Reports() {
             <option>Tapak Beta</option>
             <option>Tapak Gamma</option>
           </select>
-          <button className="btn btn-primary">📥 Muat Turun CSV</button>
+          <button className="btn btn-primary" onClick={() => alert('Fungsi Muat Turun CSV akan ditambah pada fasa seterusnya.')}>📥 Muat Turun CSV</button>
         </div>
       </div>
     </div>

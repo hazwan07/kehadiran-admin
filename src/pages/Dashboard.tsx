@@ -20,7 +20,10 @@ type RecordData = {
   status: string;
 };
 
+import { useNavigate } from 'react-router-dom';
+
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [recentClockIns, setRecentClockIns] = useState<RecordData[]>([]);
 
   useEffect(() => {
@@ -47,7 +50,7 @@ export default function Dashboard() {
       {/* Alert Banner */}
       <div className="alert-banner alert-warning">
         ⚠️ <strong>5 rekod</strong> memerlukan semakan segera.
-        <a href="/flagged" style={{ marginLeft: 'auto', color: '#92400e', fontWeight: 700 }}>Semak →</a>
+        <button onClick={() => navigate('/flagged')} style={{ marginLeft: 'auto', color: '#92400e', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', fontSize: 14 }}>Semak →</button>
       </div>
 
       {/* Stats Cards */}

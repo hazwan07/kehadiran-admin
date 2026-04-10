@@ -28,7 +28,7 @@ export default function Employees() {
           <h2>Pengurusan Pekerja</h2>
           <p>Senarai semua pekerja dan peranti mereka</p>
         </div>
-        <button className="btn btn-primary">+ Tambah Pekerja</button>
+        <button className="btn btn-primary" onClick={() => alert('Fungsi Tambah Pekerja akan ditambah pada fasa seterusnya.')}>+ Tambah Pekerja</button>
       </div>
 
       <div className="filters-bar">
@@ -84,8 +84,8 @@ export default function Employees() {
                 </td>
                 <td>
                   <div style={{ display: 'flex', gap: 6 }}>
-                    <button className="btn btn-outline btn-sm">Edit</button>
-                    <button className="btn btn-outline btn-sm" style={{ color: '#ef4444', borderColor: '#fca5a5' }}>
+                    <button className="btn btn-outline btn-sm" onClick={() => alert('Fungsi Edit akan ditambah pada fasa seterusnya.')}>Edit</button>
+                    <button className="btn btn-outline btn-sm" style={{ color: '#ef4444', borderColor: '#fca5a5' }} onClick={() => alert('Fungsi Revoke akan ditambah pada fasa seterusnya.')}>
                       Revoke
                     </button>
                   </div>
