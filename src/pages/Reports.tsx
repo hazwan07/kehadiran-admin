@@ -19,7 +19,7 @@ export default function Reports() {
 
   const handleExportCSV = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://kehadiran-backend.onrender.com';
       const r = await fetch(`${apiUrl}/api/v1/admin/attendance`);
       const json = await r.json();
       

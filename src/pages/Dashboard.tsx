@@ -27,7 +27,7 @@ export default function Dashboard() {
   const [recentClockIns, setRecentClockIns] = useState<RecordData[]>([]);
 
   useEffect(() => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://kehadiran-backend.onrender.com';
     fetch(`${apiUrl}/api/v1/admin/attendance`)
       .then(r => r.json())
       .then(json => {

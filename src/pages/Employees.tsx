@@ -20,7 +20,7 @@ export default function Employees() {
   const [formData, setFormData] = useState({ name: '', icNumber: '', department: '', pin: '123456', status: 'ACTIVE' });
   const [loading, setLoading] = useState(false);
 
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const apiUrl = import.meta.env.VITE_API_URL || 'https://kehadiran-backend.onrender.com';
 
   const fetchEmployees = async () => {
     try {

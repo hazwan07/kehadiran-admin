@@ -101,7 +101,7 @@ export default function Sites() {
   const [formData, setFormData] = useState({ name: '', address: '', latitude: 3.1390, longitude: 101.6868, geofenceRadius: 150 });
   const [loading, setLoading] = useState(false);
 
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const apiUrl = import.meta.env.VITE_API_URL || 'https://kehadiran-backend.onrender.com';
 
   const fetchSites = async () => {
     try {
