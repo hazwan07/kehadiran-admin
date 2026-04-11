@@ -57,7 +57,7 @@ export default function Employees() {
         alert('Gagal menyimpan pekerja.');
       }
     } catch (err) {
-      alert('Ralat pelayan.');
+      alert(`Ralat rangkaian/pelayan: ${String(err)}`);
     } finally {
       setLoading(false);
     }
